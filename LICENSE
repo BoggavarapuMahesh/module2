@@ -14,6 +14,14 @@ furnished to do so, subject to the following conditions:
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 
+Based on the provided code, it appears to be a script that deploys a contract with an initial balance using the Hardhat framework
+
+ The main function deploys the contract and logs the contract address and initial balance to the console
+
+ The script utilizes the Hardhat Runtime Environment (hre) and the ethers.js library to interact with the Ethereum network and deploy the contract
+
+
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
