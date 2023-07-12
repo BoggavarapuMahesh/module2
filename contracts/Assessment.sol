@@ -1,60 +1,72 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
-//import "hardhat/console.sol";
-
 contract Assessment {
     address payable public owner;
     uint256 public balance;
+    uint256 public maxWithdrawalAmount;
 
-    event Deposit(uint256 amount);
-    event Withdraw(uint256 amount);
+    event Deposit(address indexed account, uint256 amount);
+    event Withdraw(address indexed account, uint256 amount);
 
-    constructor(uint initBalance) payable {
+    constructor(uint256 initBalance, uint256 maxWithdrawal) payable {
         owner = payable(msg.sender);
         balance = initBalance;
+        maxWithdrawalAmount = maxWithdrawal;
     }
 
-    function getBalance() public view returns(uint256){
+    function getBalance() public view returns (uint256) {
         return balance;
     }
 
-    function deposit(uint256 _amount) public payable {
-        uint _previousBalance = balance;
+    function deposit() public payable {
+        require(msg.value > 0, "Deposit amount must be greater than 0");
 
-        // make sure this is the owner
-        require(msg.sender == owner, "You are not the owner of this account");
+        uint256 previousBalance = balance;
 
-        // perform transaction
-        balance += _amount;
+        // Perform transaction
+        balance += msg.value;
 
-        // assert transaction completed successfully
-        assert(balance == _previousBalance + _amount);
+        // Assert transaction completed successfully
+        assert(balance == previousBalance + msg.value);
 
-        // emit the event
-        emit Deposit(_amount);
+        // Emit the event
+        emit Deposit(msg.sender, msg.value);
     }
 
-    // custom error
+    // Custom error
     error InsufficientBalance(uint256 balance, uint256 withdrawAmount);
+    error ExceedsMaxWithdrawal(uint256 maxWithdrawal);
 
-    function withdraw(uint256 _withdrawAmount) public {
+    function withdraw(uint256 withdrawAmount) public {
         require(msg.sender == owner, "You are not the owner of this account");
-        uint _previousBalance = balance;
-        if (balance < _withdrawAmount) {
-            revert InsufficientBalance({
-                balance: balance,
-                withdrawAmount: _withdrawAmount
-            });
+
+        uint256 previousBalance = balance;
+
+        if (balance < withdrawAmount) {
+            revert InsufficientBalance(balance, withdrawAmount);
         }
 
-        // withdraw the given amount
-        balance -= _withdrawAmount;
+        if (withdrawAmount > maxWithdrawalAmount) {
+            revert ExceedsMaxWithdrawal(maxWithdrawalAmount);
+        }
 
-        // assert the balance is correct
-        assert(balance == (_previousBalance - _withdrawAmount));
+        // Withdraw the given amount
+        balance -= withdrawAmount;
 
-        // emit the event
-        emit Withdraw(_withdrawAmount);
+        // Assert the balance is correct
+        assert(balance == previousBalance - withdrawAmount);
+
+        // Transfer the funds to the owner
+        owner.transfer(withdrawAmount);
+
+        // Emit the event
+        emit Withdraw(msg.sender, withdrawAmount);
+    }
+
+    function setMaxWithdrawal(uint256 newMaxWithdrawal) public {
+        require(msg.sender == owner, "You are not the owner of this account");
+
+        maxWithdrawalAmount = newMaxWithdrawal;
     }
 }
